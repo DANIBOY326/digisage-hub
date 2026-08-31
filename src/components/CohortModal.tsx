@@ -653,55 +653,50 @@ export default function CohortModal({ open, onOpenChange }: Props) {
                       )}
                     />
 
-                    {/* ── Payment Section ── */}
-                    <div className="rounded-xl border border-border bg-secondary/30 p-4 space-y-4">
-                    <div className="flex items-center gap-2 mb-1"> <Banknote size={15} className="text-accent" />
-                    <span className="text-sm font-semibold text-foreground"> Payment — ₦15,000 / $11 </span> </div>
-                    
                     {/* Payment Account Details */}
                     
                     <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-3">
-                         Make Payment To
+                        Make Payment To
                       </p>
-                      
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-muted-foreground">Bank</span>
-                        <span className="font-semibold text-foreground">OPay</span>
-                        
-                    </div>
-                    
-                    <div className="flex items-center justify-between gap-4"> 
-                      <span className="text-muted-foreground">Account Name</span>
-                      <span className="font-semibold text-foreground text-right">
-                        Daniel Temitope Ojo
-                        </span>
-                      
-                      </div>
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="text-muted-foreground">Account Number</span>
-                        <button
-                        type="button"
-                        onClick={() => {
-                          navigator.clipboard.writeText("9051967160");
-                          toast.success("Account number copied!");
-                          }}
-                          className="font-bold text-accent hover:underline cursor-pointer"
-                          title="Click to copy account number"
-                          
-                        >
-                          9051967160
-                          </button>
-                          </div>
+
+                      <div className="space-y-3 text-sm">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-muted-foreground">Bank</span>
+                          <span className="font-semibold text-foreground">
+                            OPay
+                          </span>
                         </div>
-                        
-                      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
-                        Click the account number to copy it, then make your payment using your banking app.
-                        
-                        </p>
-                        
+
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-muted-foreground">Account Name</span>
+                          <span className="font-semibold text-foreground text-right">
+                            Daniel Temitope Ojo
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-muted-foreground">Account Number</span>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText("9051967160");
+                              toast.success("Account number copied!");
+                            }}
+                            className="font-bold text-accent hover:underline cursor-pointer"
+                            title="Click to copy account number"
+                          >
+                            9051967160
+                          </button>
+                        </div>
                       </div>
+
+                      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                        Click the account number to copy it, then make your payment using your
+                        banking app.
+                      </p>
+                    </div>
                       
                 {/* Payment Options */}
                 
@@ -787,76 +782,76 @@ export default function CohortModal({ open, onOpenChange }: Props) {
               />
               
               <div className="space-y-2">
-  <p className="text-sm font-medium text-foreground">
-    Payment Evidence{" "}
-    <span className="text-destructive">*</span>
-    <span className="text-muted-foreground font-normal text-xs">
-      {" "}(screenshot or receipt)
-    </span>
-  </p>
+                    <p className="text-sm font-medium text-foreground">
+                      Payment Evidence{" "}
+                      <span className="text-destructive">*</span>
+                      <span className="text-muted-foreground font-normal text-xs">
+                        {" "}(screenshot or receipt)
+                      </span>
+                    </p>
 
-  {!evidenceFile ? (
-    <button
-      type="button"
-      onClick={() => fileInputRef.current?.click()}
-      className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
-    >
-      <Upload size={20} className="text-muted-foreground" />
+                    {!evidenceFile ? (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                      >
+                        <Upload size={20} className="text-muted-foreground" />
 
-      <p className="text-sm text-muted-foreground">
-        Click to upload payment evidence (required)
-      </p>
+                        <p className="text-sm text-muted-foreground">
+                          Click to upload payment evidence (required)
+                        </p>
 
-      <p className="text-xs text-muted-foreground/60">
-        PNG, JPG, PDF up to 10MB
-      </p>
-    </button>
-  ) : (
-    <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
-      {evidencePreview ? (
-        <img
-          src={evidencePreview}
-          alt="Payment evidence"
-          className="w-12 h-12 rounded-lg object-cover border border-border shrink-0"
-        />
-      ) : (
-        <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border">
-          <Upload
-            size={16}
-            className="text-muted-foreground"
-          />
-        </div>
-      )}
+                        <p className="text-xs text-muted-foreground/60">
+                          PNG, JPG, PDF up to 10MB
+                        </p>
+                      </button>
+                    ) : (
+                      <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
+                        {evidencePreview ? (
+                          <img
+                            src={evidencePreview}
+                            alt="Payment evidence"
+                            className="w-12 h-12 rounded-lg object-cover border border-border shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border">
+                            <Upload
+                              size={16}
+                              className="text-muted-foreground"
+                            />
+                          </div>
+                        )}
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">
-          {evidenceFile.name}
-        </p>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">
+                            {evidenceFile.name}
+                          </p>
 
-        <p className="text-xs text-muted-foreground">
-          {(evidenceFile.size / 1024).toFixed(0)} KB
-        </p>
-      </div>
+                          <p className="text-xs text-muted-foreground">
+                            {(evidenceFile.size / 1024).toFixed(0)} KB
+                          </p>
+                        </div>
 
-      <button
-        type="button"
-        onClick={removeFile}
-        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
-        aria-label="Remove payment evidence"
-      >
-        <X size={14} />
-      </button>
-    </div>
-  )}
+                        <button
+                          type="button"
+                          onClick={removeFile}
+                          className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+                          aria-label="Remove payment evidence"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
 
-  <input
-    ref={fileInputRef}
-    type="file"
-    accept="image/*,.pdf"
-    className="hidden"
-    onChange={handleFileChange}
-  />
-</div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                  </div>
 
                     <div className="flex gap-3 pt-1">
                       <Button
