@@ -781,6 +781,27 @@ export default function CohortModal({ open, onOpenChange }: Props) {
                   The DigiSage team will be in touch soon with next steps and cohort details.
                 </p>
 
+            {/* WhatsApp Group CTA */} 
+                <div className="max-w-sm mx-auto mb-8 p-4 rounded-xl bg-accent/10 border border-accent/20">
+                  <p className="text-sm font-medium text-foreground mb-3">
+                    Join the DigiSage Hub WhatsApp Group
+                  </p>
+                  
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Join the official group to receive important announcements, cohort
+                    updates, learning resources, and other information.
+                  </p>
+                      
+                  <a 
+                    href="https://chat.whatsapp.com/JaDw0jAzBBD81UVs29HhWS"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center w-full rounded-lg bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground transition-opacity hover:opacity-90"
+                  >
+                    Join WhatsApp Group
+                  </a>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button
                     variant="ghost"
