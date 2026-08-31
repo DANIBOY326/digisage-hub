@@ -786,42 +786,77 @@ export default function CohortModal({ open, onOpenChange }: Props) {
               )}
               />
               
-              {/* Payment evidence upload */}
-              
-              <p className="text-sm font-medium text-foreground mb-2">
-                Payment Evidence{" "}
-                <span className="text-destructive">*</span>
-                <span className="text-muted-foreground font-normal text-xs">
-                  {" "}(screenshot or receipt)
-                </span>
-              </p>
-              
-              {!evidenceFile ? (
-                <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                >
-                  <Upload size={20} className="text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload payment evidence (required)
-                    
-                    </p>
+              <div className="space-y-2">
+  <p className="text-sm font-medium text-foreground">
+    Payment Evidence{" "}
+    <span className="text-destructive">*</span>
+    <span className="text-muted-foreground font-normal text-xs">
+      {" "}(screenshot or receipt)
+    </span>
+  </p>
 
-                    <p className="text-xs text-muted-foreground/60">
-                    PNG, JPG, PDF up to 10MB
-                    
-                    </p>
+  {!evidenceFile ? (
+    <button
+      type="button"
+      onClick={() => fileInputRef.current?.click()}
+      className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+    >
+      <Upload size={20} className="text-muted-foreground" />
 
-                    </button>
-                  ) : ( 
-                    <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
-                      
-                      {evidencePreview ? (
-                        <img
-                        src={evidencePreview}
-                        alt="Payment evidence"
-                        className="w-12 h-12 rounded-lg object-cover border border-border shrink-0" /> ) : ( <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border"> <Upload size={16} className="text-muted-foreground" /> </div> )} <div className="flex-1 min-w-0"> <p className="text-sm font-medium text-foreground truncate"> {evidenceFile.name} </p> <p className="text-xs text-muted-foreground"> {(evidenceFile.size / 1024).toFixed(0)} KB </p> </div> <button type="button" onClick={removeFile} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0" > <X size={14} /> </button> </div> )} <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} /> </div> </div>
+      <p className="text-sm text-muted-foreground">
+        Click to upload payment evidence (required)
+      </p>
+
+      <p className="text-xs text-muted-foreground/60">
+        PNG, JPG, PDF up to 10MB
+      </p>
+    </button>
+  ) : (
+    <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
+      {evidencePreview ? (
+        <img
+          src={evidencePreview}
+          alt="Payment evidence"
+          className="w-12 h-12 rounded-lg object-cover border border-border shrink-0"
+        />
+      ) : (
+        <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border">
+          <Upload
+            size={16}
+            className="text-muted-foreground"
+          />
+        </div>
+      )}
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground truncate">
+          {evidenceFile.name}
+        </p>
+
+        <p className="text-xs text-muted-foreground">
+          {(evidenceFile.size / 1024).toFixed(0)} KB
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={removeFile}
+        className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
+        aria-label="Remove payment evidence"
+      >
+        <X size={14} />
+      </button>
+    </div>
+  )}
+
+  <input
+    ref={fileInputRef}
+    type="file"
+    accept="image/*,.pdf"
+    className="hidden"
+    onChange={handleFileChange}
+  />
+</div>
 
                     <div className="flex gap-3 pt-1">
                       <Button
