@@ -19,7 +19,7 @@ export const submitRegistration = mutation({
     cohortPreference: v.string(),
     motivation: v.string(),
     paymentType: v.union(v.literal("full"), v.literal("part")),
-    paymentEvidenceStorageId: v.optional(v.id("_storage")),
+    paymentEvidenceStorageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
     const id = await ctx.db.insert("cohortRegistrations", {

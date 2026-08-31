@@ -29,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select.tsx";
 import { api } from "@/convex/_generated/api.js";
-import type { Id } from "@/convex/_generated/dataModel.d.ts";
+import type { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import {
   BarChart2,
@@ -165,9 +165,9 @@ const COURSES = [
 
 const COHORT_OPTIONS = [
   "Next available cohort",
-  "Q3 2026 (July – September)",
   "Q4 2026 (October – December)",
   "Q1 2027 (January – March)",
+  "Q2 2027 (April – June)",
 ];
 
 // ── Form schema ────────────────────────────────────────────────────────────────
@@ -240,21 +240,42 @@ export default function CohortModal({ open, onOpenChange }: Props) {
   const paymentType = form.watch("paymentType");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("File must be under 10MB");
-      return;
-    }
-    setEvidenceFile(file);
-    if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (ev) => setEvidencePreview(ev.target?.result as string);
-      reader.readAsDataURL(file);
-    } else {
-      setEvidencePreview(null);
-    }
-  };
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  const allowedTypes = [
+    "image/png",
+    "image/jpeg",
+    "application/pdf",
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    toast.error("Please upload a PNG, JPG, or PDF file.");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    toast.error("File must be under 10MB.");
+    e.target.value = "";
+    return;
+  }
+
+  setEvidenceFile(file);
+
+  if (file.type.startsWith("image/")) {
+    const reader = new FileReader();
+
+    reader.onload = (ev) => {
+      setEvidencePreview(ev.target?.result as string);
+    };
+
+    reader.readAsDataURL(file);
+  } else {
+    setEvidencePreview(null);
+  }
+};
 
   const removeFile = () => {
     setEvidenceFile(null);
@@ -263,33 +284,65 @@ export default function CohortModal({ open, onOpenChange }: Props) {
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (!selectedCourse) return;
-    try {
-      let paymentEvidenceStorageId: Id<"_storage"> | undefined;
+  if (!selectedCourse) {
+    toast.error("Please select a course.");
+    return;
+  }
 
-      if (evidenceFile) {
-        const uploadUrl = await generateUploadUrl();
-        const result = await fetch(uploadUrl, {
-          method: "POST",
-          headers: { "Content-Type": evidenceFile.type },
-          body: evidenceFile,
-        });
-        if (!result.ok) throw new Error("Upload failed");
-        const { storageId } = (await result.json()) as { storageId: Id<"_storage"> };
-        paymentEvidenceStorageId = storageId;
-      }
+  if (!evidenceFile) {
+    toast.error("Please upload your payment evidence before submitting.");
+    return;
+  }
 
-      await submitRegistration({
-        ...values,
-        courseId: selectedCourse.id,
-        courseName: selectedCourse.name,
-        paymentEvidenceStorageId,
-      });
-      setStep("success");
-    } catch {
-      toast.error("Something went wrong. Please try again.");
+  try {
+    // 1. Get Convex upload URL
+    const uploadUrl = await generateUploadUrl();
+
+    // 2. Upload evidence
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": evidenceFile.type,
+      },
+      body: evidenceFile,
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error("Payment evidence upload failed.");
     }
-  };
+
+    // 3. Get storage ID
+    const { storageId } = (await uploadResponse.json()) as {
+      storageId: Id<"_storage">;
+    };
+
+    // 4. Save registration
+    await submitRegistration({
+      fullName: values.fullName,
+      email: values.email,
+      phone: values.phone,
+      courseId: selectedCourse.id,
+      courseName: selectedCourse.name,
+      cohortPreference: values.cohortPreference,
+      motivation: values.motivation,
+      paymentType: values.paymentType,
+      paymentEvidenceStorageId: storageId,
+    });
+
+    // 5. Show success
+    setStep("success");
+
+    toast.success("Registration submitted successfully!");
+  } catch (error) {
+    console.error("Registration error:", error);
+
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : "We could not submit your registration. Please try again."
+    );
+  }
+};
 
   const handleClose = (open: boolean) => {
     if (!open) {
@@ -490,19 +543,25 @@ export default function CohortModal({ open, onOpenChange }: Props) {
                   <DialogTitle className="font-serif text-2xl sm:text-3xl font-bold">
                     Your Details
                   </DialogTitle>
-                  {selectedCourse && (
-                    <div
-                      className={`inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full border ${selectedCourse.border} ${selectedCourse.bg} w-fit`}
-                    >
-                      <selectedCourse.icon
-                        className={selectedCourse.color}
-                        size={13}
-                      />
-                      <span className={`text-xs font-semibold ${selectedCourse.color}`}>
-                        {selectedCourse.name}
-                      </span>
-                    </div>
-                  )}
+                  
+                  {selectedCourse && (() => {
+                const SelectedCourseIcon = selectedCourse.icon;
+
+                return (
+                  <div
+                    className={`inline-flex items-center gap-2 mt-2 px-3 py-1.5 rounded-full border ${selectedCourse.border} ${selectedCourse.bg} w-fit`}
+                  >
+                    <SelectedCourseIcon
+                      className={selectedCourse.color}
+                      size={13}
+                    />
+                    <span className={`text-xs font-semibold ${selectedCourse.color}`}>
+                      {selectedCourse.name}
+                    </span>
+                  </div>
+                );
+              })()}
+
                 </DialogHeader>
 
                 <Form {...form}>
@@ -596,124 +655,173 @@ export default function CohortModal({ open, onOpenChange }: Props) {
 
                     {/* ── Payment Section ── */}
                     <div className="rounded-xl border border-border bg-secondary/30 p-4 space-y-4">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Banknote size={15} className="text-accent" />
-                        <span className="text-sm font-semibold text-foreground">
-                          Payment — ₦15,000 / $11
-                        </span>
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name="paymentType"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Payment Option</FormLabel>
-                            <div className="grid grid-cols-2 gap-3 mt-1">
-                              {/* Full payment */}
-                              <button
-                                type="button"
-                                onClick={() => field.onChange("full")}
-                                className={`rounded-xl border p-3 text-left cursor-pointer transition-all ${
-                                  field.value === "full"
-                                    ? "border-primary bg-primary/15"
-                                    : "border-border bg-card hover:border-white/20"
-                                }`}
-                              >
-                                <p className={`text-sm font-semibold mb-0.5 ${field.value === "full" ? "text-primary" : "text-foreground"}`}>
-                                  Full Payment
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  ₦15,000 / $11 now
-                                </p>
-                              </button>
-                              {/* Part payment */}
-                              <button
-                                type="button"
-                                onClick={() => field.onChange("part")}
-                                className={`rounded-xl border p-3 text-left cursor-pointer transition-all ${
-                                  field.value === "part"
-                                    ? "border-accent bg-accent/15"
-                                    : "border-border bg-card hover:border-white/20"
-                                }`}
-                              >
-                                <p className={`text-sm font-semibold mb-0.5 ${field.value === "part" ? "text-accent" : "text-foreground"}`}>
-                                  Part Payment
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  ₦7,500 / $5.50 now, balance later
-                                </p>
-                              </button>
-                            </div>
-                            {paymentType === "part" && (
-                              <p className="text-xs text-accent mt-2">
-                                You pay ₦7,500 / $5.50 now to secure your spot. The remaining balance is due before the cohort starts.
-                              </p>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {/* Payment evidence upload */}
-                      <div>
-                        <p className="text-sm font-medium text-foreground mb-2">
-                          Payment Evidence{" "}
-                          <span className="text-muted-foreground font-normal text-xs">(screenshot or receipt)</span>
-                        </p>
-                        {!evidenceFile ? (
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                          >
-                            <Upload size={20} className="text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">
-                              Click to upload payment evidence
-                            </p>
-                            <p className="text-xs text-muted-foreground/60">
-                              PNG, JPG, PDF up to 10MB
-                            </p>
-                          </button>
-                        ) : (
-                          <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
-                            {evidencePreview ? (
-                              <img
-                                src={evidencePreview}
-                                alt="Payment evidence"
-                                className="w-12 h-12 rounded-lg object-cover border border-border shrink-0"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border">
-                                <Upload size={16} className="text-muted-foreground" />
-                              </div>
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-foreground truncate">
-                                {evidenceFile.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {(evidenceFile.size / 1024).toFixed(0)} KB
-                              </p>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={removeFile}
-                              className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        )}
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*,.pdf"
-                          className="hidden"
-                          onChange={handleFileChange}
-                        />
-                      </div>
+                    <div className="flex items-center gap-2 mb-1"> <Banknote size={15} className="text-accent" />
+                    <span className="text-sm font-semibold text-foreground"> Payment — ₦15,000 / $11 </span> </div>
+                    
+                    {/* Payment Account Details */}
+                    
+                    <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-3">
+                         Make Payment To
+                      </p>
+                      
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-muted-foreground">Bank</span>
+                        <span className="font-semibold text-foreground">OPay</span>
+                        
                     </div>
+                    
+                    <div className="flex items-center justify-between gap-4"> 
+                      <span className="text-muted-foreground">Account Name</span>
+                      <span className="font-semibold text-foreground text-right">
+                        Daniel Temitope Ojo
+                        </span>
+                      
+                      </div>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-muted-foreground">Account Number</span>
+                        <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText("9051967160");
+                          toast.success("Account number copied!");
+                          }}
+                          className="font-bold text-accent hover:underline cursor-pointer"
+                          title="Click to copy account number"
+                          
+                        >
+                          9051967160
+                          </button>
+                          </div>
+                        </div>
+                        
+                      <p className="text-xs text-muted-foreground mt-3 pt-3 border-t border-border">
+                        Click the account number to copy it, then make your payment using your banking app.
+                        
+                        </p>
+                        
+                      </div>
+                      
+                {/* Payment Options */}
+                
+                <FormField
+                control={form.control}
+                name="paymentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Option</FormLabel>
+                    
+                    <div className="grid grid-cols-2 gap-3 mt-1">
+                      
+                {/* Full payment */}
+                
+                <button
+                type="button"
+                onClick={() => field.onChange("full")}
+                className={`rounded-xl border p-3 text-left cursor-pointer transition-all ${
+                  field.value === "full"
+                  ? "border-primary bg-primary/15"
+                  : "border-border bg-card hover:border-white/20"
+                  
+                  }`}
+                  
+                  >
+                    <p className={`text-sm font-semibold mb-0.5 ${
+                      field.value === "full"
+                      ? "text-primary"
+                      : "text-foreground"
+                      
+                      }`}
+                      
+                      > Full Payment
+                      </p>
+                      
+                      <p className="text-xs text-muted-foreground">
+                        ₦15,000 / $11 now
+                        </p>
+                        </button>
+                  
+                  {/* Part payment */}
+                  
+                  <button
+                  type="button"
+                  onClick={() => field.onChange("part")}
+                  className={`rounded-xl border p-3 text-left cursor-pointer transition-all ${
+                    field.value === "part"
+                    ? "border-accent bg-accent/15"
+                    : "border-border bg-card hover:border-white/20"
+                    
+                    }`}
+                  
+                  >
+                    <p
+                    className={`text-sm font-semibold mb-0.5 ${
+                      field.value === "part"
+                      ? "text-accent"
+                      : "text-foreground"
+                      }`}
+                    >
+                      Part Payment
+                      
+                    </p>
+                      <p className="text-xs text-muted-foreground">
+                        ₦7,500 / $5.50 now, balance later
+                        
+                      </p>
+                      
+                    </button>
+                  </div> 
+                
+                {paymentType === "part" && (
+                  <p className="text-xs text-accent mt-2">
+                    You pay ₦7,500 / $5.50 now to secure your spot. The remaining
+                    balance is due before the cohort starts.
+                    
+                  </p>
+                )}
+                <FormMessage />
+                </FormItem>
+              
+              )}
+              />
+              
+              {/* Payment evidence upload */}
+              
+              <p className="text-sm font-medium text-foreground mb-2">
+                Payment Evidence{" "}
+                <span className="text-destructive">*</span>
+                <span className="text-muted-foreground font-normal text-xs">
+                  {" "}(screenshot or receipt)
+                </span>
+              </p>
+              
+              {!evidenceFile ? (
+                <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border-2 border-dashed border-border rounded-xl py-5 flex flex-col items-center gap-2 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                >
+                  <Upload size={20} className="text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Click to upload payment evidence (required)
+                    
+                    </p>
+
+                    <p className="text-xs text-muted-foreground/60">
+                    PNG, JPG, PDF up to 10MB
+                    
+                    </p>
+
+                    </button>
+                  ) : ( 
+                    <div className="border border-border rounded-xl p-3 flex items-center gap-3 bg-card">
+                      
+                      {evidencePreview ? (
+                        <img
+                        src={evidencePreview}
+                        alt="Payment evidence"
+                        className="w-12 h-12 rounded-lg object-cover border border-border shrink-0" /> ) : ( <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0 border border-border"> <Upload size={16} className="text-muted-foreground" /> </div> )} <div className="flex-1 min-w-0"> <p className="text-sm font-medium text-foreground truncate"> {evidenceFile.name} </p> <p className="text-xs text-muted-foreground"> {(evidenceFile.size / 1024).toFixed(0)} KB </p> </div> <button type="button" onClick={removeFile} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground cursor-pointer shrink-0" > <X size={14} /> </button> </div> )} <input ref={fileInputRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileChange} /> </div> </div>
 
                     <div className="flex gap-3 pt-1">
                       <Button

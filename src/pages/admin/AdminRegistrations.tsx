@@ -1,7 +1,7 @@
 import { usePaginatedQuery, useQuery, useMutation } from "convex/react";
 import { Authenticated, Unauthenticated, AuthLoading } from "convex/react";
 import { api } from "@/convex/_generated/api.js";
-import type { Id } from "@/convex/_generated/dataModel.d.ts";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useState } from "react";
 import { motion } from "motion/react";
 import {
