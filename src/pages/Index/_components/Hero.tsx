@@ -105,7 +105,7 @@ export default function Hero() {
                     <span className="text-[oklch(0.74_0.17_47)] font-bold">
                       {countdown.days}d {countdown.hours}h {countdown.minutes}m
                     </span>{" "}
-                    · <span className="text-white/60">31 Aug – 30 Sep · ₦15,000 / $11</span>
+                    · <span className="text-white/60">31 Aug – 31 Oct · ₦15,000 / $11</span>
                   </span>
                 )}
                 {regState === "open" && (
