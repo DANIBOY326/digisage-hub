@@ -51,7 +51,7 @@ import {
 // Opens: Aug 31 2026 00:00 WAT (UTC+1) = Aug 30 23:00 UTC
 // Closes: Sep 30 2026 23:59 WAT
 const REG_OPEN = new Date("2026-08-30T23:00:00Z");
-const REG_CLOSE = new Date("2026-09-30T22:59:59Z");
+const REG_CLOSE = new Date("2026-10-31T22:59:59Z");
 
 export function getRegistrationState(): "before" | "open" | "closed" {
   const now = new Date();
