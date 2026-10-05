@@ -21,7 +21,7 @@ export default function Hero() {
   const regState = getRegistrationState();
   // Show countdown to open if before; to close if open
   const REG_OPEN = new Date("2026-08-30T23:00:00Z");
-  const REG_CLOSE = new Date("2026-09-30T22:59:59Z");
+  const REG_CLOSE = new Date("2026-10-31T22:59:59Z");
   const countdownTarget = regState === "before" ? REG_OPEN : REG_CLOSE;
   const countdown = useCountdown(countdownTarget);
 

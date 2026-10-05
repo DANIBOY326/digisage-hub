@@ -49,7 +49,7 @@ import {
 
 // ── Registration window ────────────────────────────────────────────────────────
 // Opens: Aug 31 2026 00:00 WAT (UTC+1) = Aug 30 23:00 UTC
-// Closes: Sep 30 2026 23:59 WAT
+// Closes: Oct 31 2026 23:59 WAT
 const REG_OPEN = new Date("2026-08-30T23:00:00Z");
 const REG_CLOSE = new Date("2026-10-31T22:59:59Z");
 
@@ -402,7 +402,7 @@ export default function CohortModal({ open, onOpenChange }: Props) {
                       <span className="text-foreground font-semibold">
                         31st August 2026
                       </span>{" "}
-                      and closes 30th September 2026.
+                      and closes 31st October 2026.
                     </p>
                     <div className="flex items-end justify-center gap-3 mb-6">
                       <CountTile value={countdown.days} label="Days" />
